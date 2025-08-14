@@ -38,4 +38,3 @@ Add overdue tracking field in BorrowRecord (due_date, is_overdue)
 
 Add email notifications for overdue or newly available books.
 
-wc^kvf^mc5&=*-1sq@)^is)g7d42t%siv#)n!18gxb$p(hta^^
