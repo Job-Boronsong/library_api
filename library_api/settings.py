@@ -4,6 +4,11 @@ from pathlib import Path
 import os
 from decouple import config
 import dj_database_url
+from dotenv import load_dotenv
+
+load_dotenv() # This loads the variables from the .env file
+secret_key = os.getenv("SECRET_KEY")
+
 DATABASES['default'] = dj_database_url.config(default=config('DATABASE_URL'))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
