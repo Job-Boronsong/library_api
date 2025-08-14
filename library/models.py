@@ -3,9 +3,7 @@ from django.contrib.auth.models import AbstractUser
 
 # Custom User model
 class User(AbstractUser):
-    email = models.EmailField(unique=True)
-    date_joined = models.DateTimeField(auto_now_add=True)
-    is_active = models.BooleanField(default=True)
+    date_of_membership = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return self.username
