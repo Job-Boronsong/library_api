@@ -1,0 +1,90 @@
+Remaining Tasks
+1. Serializers
+
+Create DRF serializers for:
+
+UserSerializer (for creating and listing users — exclude password in listing)
+
+BookSerializer
+
+BorrowRecordSerializer
+
+Add validation for unique ISBN and borrowing rules.
+
+2. ViewSets (CRUD + Borrow/Return logic)
+
+UserViewSet → CRUD for library users (admin-only for create/delete)
+
+BookViewSet → CRUD for books
+
+BorrowRecordViewSet → read borrowing history
+
+Custom actions:
+
+borrow_book (POST) → Check availability, ensure user hasn’t borrowed same book
+
+return_book (POST) → Mark return date, increment book stock
+
+3. Routers & URLs
+
+Use DefaultRouter to register:
+
+/users/
+
+/books/
+
+/borrow-records/
+
+Add custom routes for borrow/ and return/ endpoints.
+
+4. Authentication
+
+Token-based authentication (already added in settings.py)
+
+Add /api-token-auth/ endpoint for token retrieval
+
+5. Filtering & Search
+
+Implement DRF filtering for:
+
+Available books only
+
+Search by title, author, or isbn
+
+6. Permissions
+
+IsAuthenticated for most endpoints
+
+Admin-only for:
+
+Adding/deleting books
+
+Managing users
+
+Normal users can:
+
+Borrow/return books
+
+View books
+
+See their own borrow history
+
+7. Deployment
+
+Choose Heroku or PythonAnywhere
+
+Set up requirements.txt, Procfile (if Heroku)
+
+Migrate DB to production
+
+Create superuser in production
+
+8. Stretch Goals (Optional)
+
+Role-based permissions (Admin vs Member)
+
+Overdue tracking
+
+Pagination for book list
+
+Email notifications for overdue/available books
