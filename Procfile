@@ -1,2 +1,2 @@
-web: gunicorn capstone-library-api.wsgi --log-file -
+web: gunicorn capstone_library_api.wsgi --log-file -
 
