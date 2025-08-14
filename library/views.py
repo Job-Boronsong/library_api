@@ -1,19 +1,19 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from .models import User, Book, BorrowRecord
-from .serializers import UserSerializer, BookSerializer, BorrowRecordSerializer
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
+from .models import User, Book, BorrowRecord
+from .serializers import UserSerializer, BookSerializer, BorrowRecordSerializer
+
 
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['title', 'author', 'isbn']  # Exact matches
-    search_fields = ['title', 'author', 'isbn']  # Partial matches
+    filterset_fields = ['title', 'author', 'isbn']  # Exact match filters
+    search_fields = ['title', 'author', 'isbn']     # Partial match search
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -22,10 +22,12 @@ class BookViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def available(self, request):
+        """List books with at least 1 copy available"""
         books = Book.objects.filter(copies_available__gt=0)
         serializer = self.get_serializer(books, many=True)
         return Response(serializer.data)
-    
+
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -36,35 +38,20 @@ class UserViewSet(viewsets.ModelViewSet):
         return [IsAuthenticated()]
 
 
-class BookViewSet(viewsets.ModelViewSet):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-
-    def get_permissions(self):
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            return [IsAdminUser()]
-        return [IsAuthenticated()]
-
-    @action(detail=False, methods=['get'])
-    def available(self, request):
-        books = Book.objects.filter(copies_available__gt=0)
-        serializer = self.get_serializer(books, many=True)
-        return Response(serializer.data)
-
-
 class BorrowRecordViewSet(viewsets.ModelViewSet):
     queryset = BorrowRecord.objects.all()
     serializer_class = BorrowRecordSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Users can only see their own borrow records unless admin
+        """Admins see all borrow records; normal users see only their own."""
         if self.request.user.is_staff:
             return BorrowRecord.objects.all()
         return BorrowRecord.objects.filter(user=self.request.user)
 
     @action(detail=False, methods=['post'])
     def borrow_book(self, request):
+        """Borrow a book if available."""
         book_id = request.data.get('book_id')
         try:
             book = Book.objects.get(id=book_id)
@@ -85,6 +72,7 @@ class BorrowRecordViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def return_book(self, request):
+        """Return a borrowed book."""
         record_id = request.data.get('record_id')
         try:
             record = BorrowRecord.objects.get(id=record_id, user=request.user, returned_at__isnull=True)
