@@ -8,7 +8,7 @@ print(get_random_secret_key())
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'library_api.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'capstone-library-api.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

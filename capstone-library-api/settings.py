@@ -50,7 +50,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'library_api.urls'
+ROOT_URLCONF = 'capstone-library-api.urls'
 
 TEMPLATES = [
     {
