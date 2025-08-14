@@ -41,7 +41,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'capstone-library-api.urls'
+ROOT_URLCONF = 'capstone_library_api.urls'
 
 TEMPLATES = [
     {
@@ -58,7 +58,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'capstone-library-api.wsgi.application'
+WSGI_APPLICATION = 'capstone_library_api.wsgi.application'
 
 # -----------------
 # Database settings
