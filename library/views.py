@@ -5,8 +5,27 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .models import User, Book, BorrowRecord
 from .serializers import UserSerializer, BookSerializer, BorrowRecordSerializer
 from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 
+class BookViewSet(viewsets.ModelViewSet):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['title', 'author', 'isbn']  # Exact matches
+    search_fields = ['title', 'author', 'isbn']  # Partial matches
 
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
+
+    @action(detail=False, methods=['get'])
+    def available(self, request):
+        books = Book.objects.filter(copies_available__gt=0)
+        serializer = self.get_serializer(books, many=True)
+        return Response(serializer.data)
+    
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
