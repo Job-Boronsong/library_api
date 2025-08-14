@@ -1,1 +1,1 @@
-web: gunicorn library_api.wsgi
+web: gunicorn capstone_library_api.wsgi
