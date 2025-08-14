@@ -11,9 +11,11 @@ from .serializers import UserSerializer, BookSerializer, BorrowRecordSerializer
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['title', 'author', 'isbn']  # Exact match filters
-    search_fields = ['title', 'author', 'isbn']     # Partial match search
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['title', 'author', 'isbn']  # Exact match
+    search_fields = ['title', 'author', 'isbn']  # Partial match
+    ordering_fields = ['title', 'author', 'published_date', 'copies_available']
+    ordering = ['title']  # Default ordering
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -22,7 +24,6 @@ class BookViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def available(self, request):
-        """List books with at least 1 copy available"""
         books = Book.objects.filter(copies_available__gt=0)
         serializer = self.get_serializer(books, many=True)
         return Response(serializer.data)
@@ -42,16 +43,17 @@ class BorrowRecordViewSet(viewsets.ModelViewSet):
     queryset = BorrowRecord.objects.all()
     serializer_class = BorrowRecordSerializer
     permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    ordering_fields = ['borrowed_at', 'returned_at']
+    ordering = ['-borrowed_at']
 
     def get_queryset(self):
-        """Admins see all borrow records; normal users see only their own."""
         if self.request.user.is_staff:
             return BorrowRecord.objects.all()
         return BorrowRecord.objects.filter(user=self.request.user)
 
     @action(detail=False, methods=['post'])
     def borrow_book(self, request):
-        """Borrow a book if available."""
         book_id = request.data.get('book_id')
         try:
             book = Book.objects.get(id=book_id)
@@ -72,7 +74,6 @@ class BorrowRecordViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def return_book(self, request):
-        """Return a borrowed book."""
         record_id = request.data.get('record_id')
         try:
             record = BorrowRecord.objects.get(id=record_id, user=request.user, returned_at__isnull=True)
@@ -87,3 +88,4 @@ class BorrowRecordViewSet(viewsets.ModelViewSet):
         book.save()
 
         return Response({"success": f"You have returned '{book.title}'"}, status=status.HTTP_200_OK)
+
