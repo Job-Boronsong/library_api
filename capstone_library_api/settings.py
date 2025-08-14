@@ -13,7 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security
 DEBUG = config('DEBUG', default=False, cast=bool)
 SECRET_KEY = config('SECRET_KEY', default='changeme')
-ALLOWED_HOSTS = ['*']  # Change this in production
+ALLOWED_HOSTS = ['capstone-library-api.herokuapp.com', 'localhost', '127.0.0.1']
 AUTH_USER_MODEL = 'library.User'
 
 # Application definition
