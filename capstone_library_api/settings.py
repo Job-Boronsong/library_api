@@ -4,7 +4,7 @@ from decouple import config
 import dj_database_url
 from dotenv import load_dotenv
 
-# Load environment variables from .env file (local dev)
+# Load environment variables from .env (only in local dev)
 load_dotenv()
 
 # -----------------
@@ -17,11 +17,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # -----------------
 SECRET_KEY = config('SECRET_KEY', default='changeme')
 DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = [
-    'capstone-library-api.herokuapp.com',
-    'localhost',
-    '127.0.0.1'
-]
+
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='capstone-library-api.herokuapp.com,localhost,127.0.0.1'
+).split(',')
 
 AUTH_USER_MODEL = 'library.User'
 
@@ -92,6 +92,7 @@ DATABASES = {
     }
 }
 
+# Use Postgres in production if DATABASE_URL is set
 DATABASE_URL = config('DATABASE_URL', default=None)
 if DATABASE_URL:
     DATABASES['default'] = dj_database_url.config(
@@ -121,9 +122,13 @@ USE_TZ = True
 # -----------------
 # Static files settings
 # -----------------
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Media files (optional)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # -----------------
 # Default primary key field type
