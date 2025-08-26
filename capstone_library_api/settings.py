@@ -3,6 +3,7 @@ import os
 from decouple import config
 import dj_database_url
 from dotenv import load_dotenv
+from rest_framework import serializers
 
 # Load environment variables from .env (only in local dev)
 load_dotenv()
@@ -153,3 +154,13 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 }
+
+class BookSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Book
+        fields = '__all__'
+
+    def validate_isbn(self, value):
+        if Book.objects.filter(isbn=value).exists():
+            raise serializers.ValidationError("A book with this ISBN already exists.")
+        return value
