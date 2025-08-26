@@ -3,19 +3,12 @@ import os
 from decouple import config
 import dj_database_url
 from dotenv import load_dotenv
-from rest_framework import serializers
 
 # Load environment variables from .env (only in local dev)
 load_dotenv()
 
-# -----------------
-# Base directory
-# -----------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# -----------------
-# Security settings
-# -----------------
 SECRET_KEY = config('SECRET_KEY', default='changeme')
 DEBUG = config('DEBUG', default=False, cast=bool)
 
@@ -26,9 +19,6 @@ ALLOWED_HOSTS = config(
 
 AUTH_USER_MODEL = 'library.User'
 
-# -----------------
-# Installed apps
-# -----------------
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,21 +27,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Third-party apps
+    # Third-party
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
 
-    # Local apps
+    # Local
     'library',
 ]
 
-# -----------------
-# Middleware
-# -----------------
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Static files in production
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -60,9 +47,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# -----------------
-# URL and WSGI/ASGI settings
-# -----------------
 ROOT_URLCONF = 'capstone_library_api.urls'
 
 TEMPLATES = [
@@ -83,9 +67,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'capstone_library_api.wsgi.application'
 ASGI_APPLICATION = 'capstone_library_api.asgi.application'
 
-# -----------------
-# Database settings
-# -----------------
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -93,7 +74,6 @@ DATABASES = {
     }
 }
 
-# Use Postgres in production if DATABASE_URL is set
 DATABASE_URL = config('DATABASE_URL', default=None)
 if DATABASE_URL:
     DATABASES['default'] = dj_database_url.config(
@@ -102,9 +82,6 @@ if DATABASE_URL:
         ssl_require=True
     )
 
-# -----------------
-# Password validation
-# -----------------
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -112,33 +89,20 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# -----------------
-# Internationalization
-# -----------------
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# -----------------
-# Static files settings
-# -----------------
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files (optional)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# -----------------
-# Default primary key field type
-# -----------------
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# -----------------
-# Django REST Framework settings
-# -----------------
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
@@ -154,13 +118,3 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 }
-
-class BookSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Book
-        fields = '__all__'
-
-    def validate_isbn(self, value):
-        if Book.objects.filter(isbn=value).exists():
-            raise serializers.ValidationError("A book with this ISBN already exists.")
-        return value

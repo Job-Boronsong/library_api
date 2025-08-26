@@ -9,8 +9,12 @@ class UserSerializer(serializers.ModelSerializer):
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = ['id', 'title', 'author', 'isbn', 'available']
+        fields = '__all__'
 
+    def validate_isbn(self, value):
+        if Book.objects.filter(isbn=value).exists():
+            raise serializers.ValidationError("A book with this ISBN already exists.")
+        return value
 class LoanSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     book = BookSerializer(read_only=True)
