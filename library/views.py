@@ -3,8 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
 
-from .models import Book, User, BorrowRecord
-from .serializers import BookSerializer, UserSerializer, BorrowRecordSerializer
+from .models import Book, User, Loan   # ✅ FIXED
+from .serializers import BookSerializer, UserSerializer, LoanSerializer
 from .permissions import IsAdminOrReadOnly, IsAdmin, IsOwnerOrAdmin
 
 
@@ -45,11 +45,11 @@ class BookViewSet(viewsets.ModelViewSet):
             return Response({"error": "No copies available"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Check if user already borrowed this book
-        if BorrowRecord.objects.filter(user=user, book=book, returned_at__isnull=True).exists():
+        if Loan.objects.filter(user=user, book=book, returned_at__isnull=True).exists():  # ✅ FIXED
             return Response({"error": "You already borrowed this book"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Borrow book
-        BorrowRecord.objects.create(user=user, book=book, borrowed_at=timezone.now())
+        Loan.objects.create(user=user, book=book, loan_date=timezone.now())  # ✅ FIXED
         book.copies_available -= 1
         book.save()
         return Response({"message": f"You borrowed '{book.title}'"}, status=status.HTTP_200_OK)
@@ -59,12 +59,12 @@ class BookViewSet(viewsets.ModelViewSet):
         book = self.get_object()
         user = request.user
 
-        record = BorrowRecord.objects.filter(user=user, book=book, returned_at__isnull=True).first()
+        record = Loan.objects.filter(user=user, book=book, returned_at__isnull=True).first()  # ✅ FIXED
         if not record:
             return Response({"error": "You have not borrowed this book"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Return book
-        record.returned_at = timezone.now()
+        record.returned_at = timezone.now()  # ✅ FIXED
         record.save()
         book.copies_available += 1
         book.save()
@@ -72,16 +72,16 @@ class BookViewSet(viewsets.ModelViewSet):
 
 
 # ---------------------------
-# BorrowRecord ViewSet
+# Loan ViewSet
 # ---------------------------
-class BorrowRecordViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = BorrowRecordSerializer
+class LoanViewSet(viewsets.ReadOnlyModelViewSet):  # ✅ Renamed for clarity
+    serializer_class = LoanSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
         # Admins can see all records
         if user.is_staff:
-            return BorrowRecord.objects.all()
+            return Loan.objects.all()  # ✅ FIXED
         # Members only see their own history
-        return BorrowRecord.objects.filter(user=user)
+        return Loan.objects.filter(user=user)  # ✅ FIXED
